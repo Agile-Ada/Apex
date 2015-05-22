@@ -1,0 +1,37 @@
+name = Solaris
+description = Solaris copyright by <a href="http://tabvn.com">Tabvn.com</a>
+package = Core
+version = VERSION
+core = 7.x
+
+stylesheets[all][] = css/fontface/fontface.css
+stylesheets[all][] = css/style.css
+stylesheets[all][] = css/responsive.css
+
+
+features[] = logo
+
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = favicon
+
+
+scripts[] = js/jquery.defaultvalue.js
+scripts[] = js/jquery.isotope.min.js
+scripts[] = js/solaris.js
+
+regions[sidebar_first]  = Left sidebar
+regions[sidebar_second] = Right sidebar
+regions[solaris_page_title] = Page title
+regions[content] = Content
+regions[content_bottom] = Content bottom
+regions[sidebar_first] = Sidebar First
+regions[header_top] = Header top
+regions[header] = Header
+regions[postscript] = Post Script
+regions[footer] = Footer
+regions[footer_bottom] = Footer bottom
+regions[highlighted] = Highlighted
+regions[help] = Help
+regions[page_top] = Page Top
+regions[page_bottom] = Page Bottom
