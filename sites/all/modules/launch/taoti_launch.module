@@ -1,0 +1,294 @@
+<?php
+
+/**
+ * @file
+ * Code for the taoti_launch module.
+ */
+
+/**
+ * Implements hook_checklistapi_checklist_info().
+ */
+function taoti_launch_checklistapi_checklist_info() {
+
+  // Pull search index stats (cribbed from search_admin_settings() in search.admin.inc
+
+  $search_stat_remaining = 0;
+  $search_stat_total = 0;
+  foreach (variable_get('search_active_modules', array('node', 'user')) as $module) {
+    if ($status = module_invoke($module, 'search_status')) {
+      $search_stat_remaining += $status['remaining'];
+      $search_stat_total += $status['total'];
+    }
+  }
+
+  $search_stat_count = format_plural($search_stat_remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
+  $search_stat_percentage = ((int)min(100, 100 * ($search_stat_total - $search_stat_remaining) / max(1, $search_stat_total))) . '%';
+
+  $threshold_warning = variable_get('cron_threshold_warning', 172800);
+  $cron_last = variable_get('cron_last');
+  $last_cron_run = format_interval(REQUEST_TIME - variable_get('cron_last'));
+
+  $modules_page = array('#text' => t('Enable'), '#path' => 'admin/modules');
+
+  $definitions = array();
+  $definitions['taoti_launch'] = array(
+    '#title' => t('Taoti Launch Checklist'),
+    '#description' => t('Checklist of final checks for launching project or checking existing site'),
+    '#path' => 'admin/config/development/launch-checklist',
+    '#help' => t("<p>This checklist will help </p>"),
+
+    // Security Review
+    'check_security' => array(
+		  '#title' => t('Security Review'),
+
+		 'check_user_register' => array(
+			'#title' => t('Confirm user registration settings are set to Administrator only'),
+			'#default_value' => !(variable_get('user_register', 0)),
+			'project_page' => array(
+			  '#text' => t('User registration settings'),
+			  '#path' => 'admin/config/people/accounts',
+			),			
+		  ),     
+
+		 'disable_php_filter' => array(
+			'#title' => t('Disable the php_filter module or be prepared to justify its use'),
+			'#default_value' => _check_disable_php_filter(),
+			'modules_page' => $modules_page,
+		  ),
+		  'install_security_review_module' => array(
+			'#title' => t('Install and run security review module to check for issues.'),
+			'#default_value' => _check_install_security_review_module(),
+			'project_page' => array(
+			  '#text' => t('Download Security Review module from Drupal.org'),
+			  '#path' => 'http://drupal.org/project/security_review',
+			),
+			'modules_page' => $modules_page,
+            'report_page' => array(
+              '#text' => t('View or Run Report'),
+              '#path' => 'admin/reports/security-review',
+            ),
+		  ),
+		  'install_botcha_module' => array(
+			'#title' => t('Install and enable BOTCHA module to combat spambots.'),
+			'#default_value' => module_exists('botcha'),
+			'project_page' => array(
+			  '#text' => t('Download BOTCHA module from Drupal.org'),
+			  '#path' => 'http://drupal.org/project/botcha',
+			),
+			'modules_page' => $modules_page,
+		  ),
+		  'enable_syslog_module' => array(
+			'#title' => t('Enable the syslog module to track Drupal system events to the server system logs.'),
+			'#default_value' => _check_enable_syslog_module(),
+			'project_page' => array(
+			  '#text' => t('Download BOTCHA module from Drupal.org'),
+			  '#path' => 'http://drupal.org/project/botcha',
+			),
+			'modules_page' => $modules_page,
+		  ),
+		  'disable_error_reporting' => array(
+			'#title' => t('Disable display of site errors to avoid exposing vulnerabilities'),
+			'#default_value' => _check_disable_error_reporting(),
+			'project_page' => array(
+			  '#text' => t('Disable error display'),
+			  '#path' => 'admin/config/development/logging',
+			)  
+		),
+
+		  		  
+	),
+	
+	// Development Cleanup
+    'development_cleanup' => array(
+      '#title' => t('Development Cleanup'),
+
+		'disable_devel_module' => array(
+			'#title' => t('Disable the devel module'),
+			'#default_value' => _check_disable_devel_module(),
+			'modules_page' => $modules_page,
+		),      
+		'disable_coder_module' => array(
+			'#title' => t('Disable the coder module'),
+			'#default_value' => _check_disable_coder(),
+			'modules_page' => $modules_page,
+		),		
+		'disable_migrate_module' => array(
+			'#title' => t('Disable the migrate module'),
+			'#default_value' => _check_disable_migrate(),
+			'modules_page' => $modules_page,
+		),		
+		'disable_simpletest_module' => array(
+			'#title' => t('Disable the simpletest module'),
+			'#default_value' => _check_disable_simpletest(),
+			'modules_page' => $modules_page,
+		),		
+		'disable_registry_rebuild' => array(
+			'#title' => t('Turn off the "Rebuild theme registry on every page" development option'),
+			'#default_value' => _check_disable_registry_rebuild(),
+			'project_page' => array(
+			  '#text' => t('Development settings'),
+			  '#path' => '/admin/config/development/devel',
+			)  
+
+		),		
+
+		'check_test_content' => array(
+			'#title' => t('Confirm test / development content has been removed (tip: check earliest entries in admin/content/node).'),
+			'#default_value' => 0,
+			'project_page' => array(
+			  '#text' => t('View content, oldest first'),
+			  '#path' => 'admin/content/node?sort=asc&order=Created',
+			)  
+		),
+
+	),
+	
+	// Optimize Performance
+    'check_performance' => array(
+      '#title' => t('Optimize Performance'),
+		 'check_aggregation' => array(
+			'#title' => t('Enable CSS & JS aggregation'),
+			'#default_value' => (variable_get('css_preprocess', 0) && variable_get('js_preprocess', 0)),
+			'project_page' => array(
+			  '#text' => t('Performance settings'),
+			  '#path' => 'admin/config/development/performance',
+			),			
+		 ),
+        'basic_caching' => array(
+            '#title' => t('Enable anonymous page & block caching'),
+            '#default_value' => (variable_get('block_cache', 0) && variable_get('cache', 0)),
+            'project_page' => array(
+              '#text' => t('Performance settings'),
+              '#path' => 'admin/config/development/performance#edit-caching',
+            ),
+         ),
+        'caching_lifetime' => array(
+            '#title' => t('Minimum cache lifetime and expiration of cached pages should be set to at least 5 minutes'),
+            '#default_value' => _check_caching_lifetime(),
+            'project_page' => array(
+              '#text' => t('Performance settings'),
+              '#path' => 'admin/config/development/performance#edit-caching',
+            ),
+         ),
+
+      
+
+    ),
+    
+	// Drupal Status Review
+    'check_drupal_status' => array(
+      '#title' => t('Review Drupal Status'),
+ 		'check_error_logs' => array(
+			'#title' => t('Review error logs, check for any critical warnings or errors'),
+			'#default_value' => 0,
+			'project_page' => array(
+			  '#text' => t('Drupal Error Logs'),
+			  '#path' => 'admin/reports/dblog',
+			)  
+		),
+ 		'check_cron' => array(
+			'#title' => 'Confirm cron job is running and runs regularly [ Last run '.$last_cron_run.' ]',
+			'#default_value' => 0,
+			'project_page' => array(
+			  '#text' => t('Run cron'),
+			  '#path' => '/cron.php?cron_key='.variable_get('cron_key', 'drupal'),
+			)  
+		),
+      
+    ),
+	
+	// Client Optimization 
+    'check_site_improvements' => array(
+      '#title' => t('Content Optimization'),
+
+		'check_site_mail' => array(
+			'#title' => 'Confirm that the site email address is pointing to the right email address [ Currently: '.variable_get('site_mail').'<b> ]',
+			'#default_value' => 0,
+			'project_page' => array(
+			  '#text' => t('Check site information settings'),
+			  '#path' => 'admin/config/system/site-information',
+			)  
+		),
+		'check_search_working' => array(
+			'#title' => t('Confirm search is working as expected by running a simple search'),
+			'#default_value' => 0,
+			'project_page' => array(
+			  '#text' => t('Search page'),
+			  '#path' => 'search/node',
+			)  
+		),
+		'check_search_index' => array(
+			'#title' => 'Confirm search index has finished running [ Current status: <b>'.$search_stat_count.'<b> ]',
+			'#default_value' => !($search_stat_remaining),
+			'project_page' => array(
+			  '#text' => t('Check search index at search settings page'),
+			  '#path' => 'admin/config/search/settings',
+			)  
+		),
+		'setup_google_analytics' => array(
+			'#title' => 'Confirm Google Analytics module is enabled with active Web Property ID',
+			'#default_value' => _check_setup_google_analytics(),
+			'project_page' => array(
+			  '#text' => t('Check search index at search settings page'),
+			  '#path' => 'admin/config/search/settings',
+			)  
+		),
+
+      
+    ),	
+	
+  );
+  return $definitions;
+}
+
+function _check_caching_lifetime() { 
+	$cache_lifetime = variable_get('cache_lifetime');
+	$cache_age = variable_get('page_cache_maximum_age');
+
+	return (($cache_lifetime>299) && ($cache_age>299));
+}
+
+function _check_setup_google_analytics() {
+	return ((module_exists('googleanalytics')) && (variable_get('googleanalytics_account', 0)));	
+}
+
+function _check_disable_php_filter() { 
+	return !(module_exists('php_filter'));
+}
+
+function _check_install_security_review_module() {
+	return module_exists('security_review');
+}
+
+function _check_disable_devel_module() {
+	return !(module_exists('devel'));
+}
+
+function _check_enable_syslog_module() {
+	return module_exists('syslog');
+}
+
+function _check_disable_error_reporting() { 
+	$error_level = variable_get("error_level");
+	return !($error_level);	
+}
+
+function _check_disable_devel_themer() {
+	return !(module_exists('devel_themer'));
+}
+
+function _check_disable_coder() {
+	return !(module_exists('coder'));
+}
+
+function _check_disable_migrate() {
+	return !(module_exists('migrate'));
+}
+
+function _check_disable_simpletest() {
+	return !(module_exists('simpletest'));
+}
+
+function _check_disable_registry_rebuild() {
+	return (!variable_get('devel_rebuild_theme_registry'));
+}

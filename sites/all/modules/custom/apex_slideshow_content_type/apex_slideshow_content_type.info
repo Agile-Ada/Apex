@@ -1,0 +1,16 @@
+name = Apex Slideshow Content Type
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = apex_slideshow_content_type
+dependencies[] = features
+dependencies[] = image
+dependencies[] = link
+dependencies[] = text
+features[features_api][] = api:1
+features[field][] = node-slideshow-body
+features[field][] = node-slideshow-field_request_quote_link
+features[field][] = node-slideshow-field_slideshow_image
+features[field][] = node-slideshow-field_slideshow_link
+features[field][] = node-slideshow-field_text
+features[node][] = slideshow

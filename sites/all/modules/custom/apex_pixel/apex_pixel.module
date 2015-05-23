@@ -1,0 +1,36 @@
+<?php
+
+
+function apex_pixel_block_info() {
+
+  $blocks['pixel_case_manager'] = array(
+    'info' => t('Case Manager Pixel'),
+  );
+
+  $blocks['pixel_medical_escort'] = array(
+    'info' => t('Medical Escort Pixel'),
+  );
+
+
+  return $blocks;
+}
+
+function apex_pixel_block_view($delta = '') {
+
+    $theme_image_path = base_path().path_to_theme().'/images';
+
+  switch ($delta) {
+
+    case 'pixel_case_manager':
+      $block['content'] = '<script async src="http://tp.multiview.com/dpx.js?cid=7643&action=100&segment=apexaircasemanager&m=1"></script>';
+      break;
+
+    case 'pixel_medical_escort':
+      $block['content'] = '<script async src="http://tp.multiview.com/dpx.js?cid=7643&action=100&segment=apexairmedicalescorting&m=1"></script>';
+      break;
+
+  }
+
+
+  return $block;
+}

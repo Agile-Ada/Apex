@@ -1,0 +1,13 @@
+name = Apex Pixel Feature
+description = Contexts and Dependencies
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = apex_pixel_feature
+dependencies[] = apex_pixel
+dependencies[] = context
+dependencies[] = ctools
+features[context][] = pixel_case_manager
+features[context][] = pixel_medical_escort
+features[ctools][] = context:context:3
+features[features_api][] = api:1

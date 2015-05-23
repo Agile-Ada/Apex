@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Apex Main Slideshow View feature.
+ */
+
+include_once 'apex_main_slideshow_view.features.inc';

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Request a Quote Block field feature.
+ */
+
+include_once 'request_a_quote_block_field.features.inc';

@@ -1,0 +1,6 @@
+name = Taoti Launch Checklist and Review
+description = An interactive checklist of performance, security, and content tasks for launch.
+core = 7.x
+dependencies[] = checklistapi
+package = Taoti
+configure = admin/config/development/launch-checklist

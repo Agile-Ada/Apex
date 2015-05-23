@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the taoti_launch module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function taoti_launch_uninstall() {
+  variable_del('checklistapi_checklist_taoti_launch');
+}

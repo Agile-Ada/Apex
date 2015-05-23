@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Apex Slideshow Content Type feature.
+ */
+
+include_once 'apex_slideshow_content_type.features.inc';

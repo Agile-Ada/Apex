@@ -1,0 +1,10 @@
+name = CTA Block Field
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = cta_block_field
+dependencies[] = ctools
+dependencies[] = ds
+features[ctools][] = ds:ds:1
+features[ds_fields][] = block_cta
+features[features_api][] = api:1

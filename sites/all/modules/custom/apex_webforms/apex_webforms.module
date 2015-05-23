@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Apex Webforms feature.
+ */
+
+include_once 'apex_webforms.features.inc';

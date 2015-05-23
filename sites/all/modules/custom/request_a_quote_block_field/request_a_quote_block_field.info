@@ -1,0 +1,10 @@
+name = Request a Quote Block field
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = request_a_quote_block_field
+dependencies[] = ctools
+dependencies[] = ds
+features[ctools][] = ds:ds:1
+features[ds_fields][] = block_request_a_quote
+features[features_api][] = api:1
